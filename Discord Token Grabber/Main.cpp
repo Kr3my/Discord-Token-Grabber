@@ -89,7 +89,7 @@ std::vector<std::string> find_paths() {
 void search_token(const std::string& target, const std::string& path) {
 	std::ifstream ifs(path, std::ios_base::binary);
 	if (!ifs.is_open()) {
-		std::cerr << "Error al abrir el archivo: " << path << std::endl;
+		std::cerr << "Error trying to open path: " << path << std::endl;
 		return;
 	}
 
