@@ -6,7 +6,7 @@
 #include <regex>
 #include <curl/curl.h>
 
-const char* webhook_url = "";
+const char* webhook_url = "put your webhook url here";
 
 bool has_extension(const std::string& filepath, const std::string& extension) {
 	std::filesystem::path path(filepath);
