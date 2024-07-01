@@ -14,7 +14,7 @@
 # 📖 Instructions
 1. Open the solution and add your webhool URL to the [Main.cpp](https://github.com/NotFxeel/Discord-Token-Grabber/blob/main/Discord%20Token%20Grabber/Main.cpp) file.
 
-![image](https://github.com/NotFxeel/Discord-Token-Grabber/assets/161180618/d66b9105-13ed-4e5a-baa8-af636b4172a1)
+![image](https://github.com/NotFxeel/Discord-Token-Grabber/assets/161180618/c52f17ca-7c4c-4209-8403-1603ac6e41f3)
 
 2. Build a x64 release.
 
