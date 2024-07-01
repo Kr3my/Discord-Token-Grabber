@@ -8,7 +8,7 @@
 
 
 # 🔥 Features
-+ **🪄 Faster than other similar token grabbers**: This project divides each task into different threads, which makes the information collected and sent to the webhook simultaneously to save time.
++ **🪄 5x faster than other similar token grabbers**: This project divides each task into different threads, which makes the information collected and sent to the webhook simultaneously to save time.
 
 
 # 📖 Instructions
