@@ -20,6 +20,9 @@
 
 ![image](https://github.com/NotFxeel/Discord-Token-Grabber/assets/161180618/ba9e1f6c-b275-45f6-8ca0-10352d068dcd)
 
+3. The grabber will log the raw token and the encrypted key, I was a bit lazy to implement it all in the same code, but I developed a python project to decrypt it and get the access token with these two elements, although you can use any other online program to help you with this. [My CLI Tool](https://github.com/NotFxeel/Token-Decryptor)
 
 # ❗DISCLAIMER
 *This project was developed by and for study purposes.*
+
+*Regex in most paths except the main discord path are quite imprecise*
